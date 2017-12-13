@@ -83,13 +83,29 @@ namespace GradeBook.GradeBooks
                 return null;
             }
 
+            BaseGradeBook gradeBook;
+
             using (var file = new FileStream(name + ".gdbk", FileMode.Open, FileAccess.Read))
             {
                 using (var reader = new StreamReader(file))
                 {
                     var json = reader.ReadToEnd();
                     var jobject = JsonConvert.DeserializeObject<JObject>(json);
-                    return JsonConvert.DeserializeObject<BaseGradeBook>(json);
+                    var type = Enum.Parse(typeof(GradeBookType), jobject.GetValue("Type").ToString(), true);
+                    switch(type)
+                    {
+                        case GradeBookType.Standard:
+                            gradeBook = JsonConvert.DeserializeObject<StandardGradeBook>(json);
+                            break;
+                        case GradeBookType.Ranked:
+                            gradeBook = JsonConvert.DeserializeObject<RankedGradeBook>(json);
+                            break;
+                        default:
+                            gradeBook = JsonConvert.DeserializeObject<StandardGradeBook>(json);
+                            break;
+                    }
+
+                    return gradeBook;
                 }
             }
         }
